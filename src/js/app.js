@@ -48,7 +48,7 @@ App = {
 
 	render: function() {
     console.log(Date.now());
-    if (Date.now() - lastRender < 100){
+    if (Date.now() - lastRender < 200){
        return;
     }
     lastRender = Date.now();
@@ -135,6 +135,14 @@ App = {
 	attack: function() {
 		var itemId = $('#candidatesSelect')
 			.val();
+
+    if (localStorage.getItem(App.account) === null) {
+        localStorage.setItem(App.account, itemId);
+    } else {
+        alert('Error: Already chosen an item');
+        return;
+    }
+
 		App.contracts.RockPaperScissors.deployed()
 			.then(function(instance) {
 				return instance.attack(itemId, { from: App.account });
@@ -153,12 +161,24 @@ App = {
 				return instance.registerPlayer({ from: App.account });
 			})
 			.then(function(result) {
-        App.render();
 			})
 			.catch(function(err) {
 				console.error(err);
 			});
 	},
+
+  revealItem: function() {
+    App.contracts.RockPaperScissors.deployed()
+      .then(function(instance) {
+        return instance.revealItem(parseInt(localStorage.getItem(App.account)), { from: App.account });
+      })
+      .then(function(result) {
+        App.render();
+      })
+      .catch(function(err) {
+        console.error(err);
+      });
+  },
 
 	listenForEvents: function() {
 		App.contracts.RockPaperScissors.deployed()
@@ -178,6 +198,9 @@ App = {
 			});
 	}
 };
+
+// TODO: Later
+// localStorage.clear();
 
 $(function() {
 	$(window)

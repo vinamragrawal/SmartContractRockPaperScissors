@@ -39,6 +39,7 @@
                   </tbody>
                 </table>
                 <hr/>
+                <button onclick="App.registerPlayer()">Play</button>
                 <form onSubmit="App.attack(); return false;">
                   <div class="form-group">
                     <label for="candidatesSelect">Select Candidate</label>
@@ -48,7 +49,7 @@
                   <button type="submit" class="btn btn-primary">Vote</button>
                   <hr />
                 </form>
-                <button onclick="App.registerPlayer()">Play</button>
+                <button onclick="App.revealItem()">Reveal Item</button>
                 <p id="accountAddress" class="text-center"></p>
               </div>
             </div>
