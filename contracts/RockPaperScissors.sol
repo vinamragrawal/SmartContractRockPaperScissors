@@ -49,15 +49,23 @@ contract RockPaperScissors {
         address addr;
     }
 
+    struct Choice {
+        uint num;
+        string name;
+    }
+
     // Read/write Candidates
     mapping(uint => Player) public players;
+    // Read/write choices
+    mapping(uint => Choice) public choices;
 
     // Store Candidates Count
     uint public playerCount;
+    // Store Choice Count
+    uint public choiceCount;
 
     // Re-render page
     event StatusEvent ();
-
     // Error message display
     event ErrorEvent (string error);
 
@@ -67,25 +75,30 @@ contract RockPaperScissors {
       players[playerCount] = Player(_name, "Waiting to register", address(0));
     }
 
+    //Add new choice
+    function addChoice (string memory _name) private {
+      choices[choiceCount] = Choice(choiceCount, _name);
+      choiceCount ++;
+    }
+
     //register players
     function registerPlayer () public {
         if (msg.sender == players[1].addr || msg.sender == players[2].addr) {
             emit ErrorEvent('Error: User Already registered');
             return;
         }
-        
-        uint playerId = 0;
 
         if (players[1].addr == address(0)) {
-            playerId = 1;
+            players[1].addr = msg.sender;
+            players[1].status = "Registered";
         } else if (players[2].addr == address(0)) {
-            playerId = 2;
+            players[2].addr = msg.sender;
+            players[2].status = "Waiting to vote";
+            players[1].status = "Waiting to vote";
         } else {
           emit ErrorEvent('Error: No more space for new users');
           return;
         }
-        players[playerId].addr = msg.sender;
-        players[playerId].status = "Registered";
     }
 
     // Constructor
@@ -94,5 +107,8 @@ contract RockPaperScissors {
       addCandidate("Player 2");
       addPlayer("Player 1");
       addPlayer("Player 2");
+      addChoice("Rock");
+      addChoice("Paper");
+      addChoice("Scissor");
     }
 }

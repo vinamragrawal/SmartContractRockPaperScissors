@@ -70,9 +70,6 @@ App = {
 				var candidatesResults = $("#candidatesResults");
 				candidatesResults.empty();
 
-				var candidatesSelect = $('#candidatesSelect');
-				candidatesSelect.empty();
-
 				for (var i = 1; i <= playerCount; i++) {
 					electionInstance.players(i)
 						.then(function(player) {
@@ -82,26 +79,48 @@ App = {
 							// Render candidate Result
 							var candidateTemplate = "<tr><td>" + name + "</td><td>" + status + "</td></tr>"
 							candidatesResults.append(candidateTemplate);
-
-							// Render candidate ballot option
-							var candidateOption = "<option value='" + 1 + "' >" + name + "</ option>"
-							candidatesSelect.append(candidateOption);
 						});
 				}
-				return electionInstance.voters(App.account);
-			})
-			.then(function(hasVoted) {
-				// Do not allow a user to vote
-				if (hasVoted) {
-					$('form')
-						.hide();
-				}
-				loader.hide();
+
+        loader.hide();
 				content.show();
 			})
 			.catch(function(error) {
 				console.warn(error);
 			});
+
+      App.contracts.RockPaperScissors.deployed()
+  			.then(function(instance) {
+  				electionInstance = instance;
+  				return electionInstance.choiceCount();
+  			})
+  			.then(function(choiceCount) {
+  				var candidatesSelect = $('#candidatesSelect');
+  				candidatesSelect.empty();
+
+  				for (var i = 0; i < choiceCount; i++) {
+  					electionInstance.choices(i)
+  						.then(function(choice) {
+  							var num = choice[0];
+  							var name = choice[1];
+
+  							// Render candidate ballot option
+  							var option = "<option value='" + num + "' >" + name + "</ option>";
+  							candidatesSelect.append(option);
+  						});
+  				}
+  				return electionInstance.voters(App.account);
+  			})
+  			.then(function(hasVoted) {
+  				// Do not allow a user to vote
+  				if (hasVoted) {
+  					$('form')
+  						.hide();
+  				}
+  			})
+  			.catch(function(error) {
+  				console.warn(error);
+  			});
 	},
 
 	castVote: function() {
