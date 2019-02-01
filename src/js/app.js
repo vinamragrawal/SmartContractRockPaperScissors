@@ -27,7 +27,18 @@ App = {
 			// Connect provider to interact with contract
 			App.contracts.RockPaperScissors.setProvider(App.web3Provider);
 
-      App.listenForEvents();
+      //Skip if any prev Event exist for this block, 
+      prevEvent = false;
+      App.contracts.RockPaperScissors.deployed()
+  			.then(function(instance) {
+  				solidityEvent = instance.allEvents();
+
+  				solidityEvent.watch(function(err, result) {
+  					prevEvent = true;
+  				});
+  			});
+
+			App.listenForEvents();
 
 			return App.render();
 		});
@@ -53,28 +64,27 @@ App = {
 		App.contracts.RockPaperScissors.deployed()
 			.then(function(instance) {
 				electionInstance = instance;
-				return electionInstance.candidatesCount();
+				return electionInstance.playerCount();
 			})
-			.then(function(candidatesCount) {
+			.then(function(playerCount) {
 				var candidatesResults = $("#candidatesResults");
 				candidatesResults.empty();
 
 				var candidatesSelect = $('#candidatesSelect');
 				candidatesSelect.empty();
 
-				for (var i = 1; i <= candidatesCount; i++) {
-					electionInstance.candidates(i)
-						.then(function(candidate) {
-							var id = candidate[0];
-							var name = candidate[1];
-							var voteCount = candidate[2];
+				for (var i = 1; i <= playerCount; i++) {
+					electionInstance.players(i)
+						.then(function(player) {
+							var name = player[0];
+							var status = player[1];
 
 							// Render candidate Result
-							var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + voteCount + "</td></tr>"
+							var candidateTemplate = "<tr><td>" + name + "</td><td>" + status + "</td></tr>"
 							candidatesResults.append(candidateTemplate);
 
 							// Render candidate ballot option
-							var candidateOption = "<option value='" + id + "' >" + name + "</ option>"
+							var candidateOption = "<option value='" + 1 + "' >" + name + "</ option>"
 							candidatesSelect.append(candidateOption);
 						});
 				}
@@ -94,31 +104,59 @@ App = {
 			});
 	},
 
-  castVote: function() {
-    var candidateId = $('#candidatesSelect').val();
-    App.contracts.RockPaperScissors.deployed().then(function(instance) {
-      return instance.vote(candidateId, { from: App.account });
-    }).then(function(result) {
-      // Wait for votes to update
-      $("#content").hide();
-      $("#loader").show();
-    }).catch(function(err) {
-      console.error(err);
-    });
-  },
+	castVote: function() {
+		var candidateId = $('#candidatesSelect')
+			.val();
+		App.contracts.RockPaperScissors.deployed()
+			.then(function(instance) {
+				console.log(candidateId);
+				return instance.vote(candidateId, { from: App.account });
+			})
+			.then(function(result) {
+				// Wait for votes to update
+				$("#content")
+					.hide();
+				$("#loader")
+					.show();
+			})
+			.catch(function(err) {
+				console.error(err);
+			});
+	},
 
-  listenForEvents: function() {
-  App.contracts.RockPaperScissors.deployed().then(function(instance) {
-    instance.votedEvent({}, {
-      fromBlock: 0,
-      toBlock: 'latest'
-    }).watch(function(error, event) {
-      console.log("event triggered", event)
-      // Reload when a new vote is recorded
-      App.render();
-    });
-  });
-}
+	registerPlayer: function() {
+		App.contracts.RockPaperScissors.deployed()
+			.then(function(instance) {
+				console.log("Calling function");
+				return instance.registerPlayer({ from: App.account });
+			})
+			.then(function(result) {
+				// Wait for votes to update
+				console.log("Player Registered");
+			})
+			.catch(function(err) {
+				console.error(err);
+			});
+	},
+
+	listenForEvents: function() {
+		App.contracts.RockPaperScissors.deployed()
+			.then(function(instance) {
+				solidityEvent = instance.allEvents();
+
+				solidityEvent.watch(function(err, result) {
+					console.log("event triggered", result.event);
+          if (prevEvent) {
+            //Skip prev event
+            prevEvent = false;
+          } else if (result.event == "StatusEvent") {
+						App.render();
+					} else if (result.event == "ErrorEvent") {
+						alert(result.args.error);
+					}
+				});
+			});
+	}
 };
 
 $(function() {
