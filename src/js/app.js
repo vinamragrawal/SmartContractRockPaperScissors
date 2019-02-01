@@ -27,16 +27,16 @@ App = {
 			// Connect provider to interact with contract
 			App.contracts.RockPaperScissors.setProvider(App.web3Provider);
 
-      //Skip if any prev Event exist for this block, 
-      prevEvent = false;
-      App.contracts.RockPaperScissors.deployed()
-  			.then(function(instance) {
-  				solidityEvent = instance.allEvents();
+			//Skip if any prev Event exist for this block,
+			prevEvent = false;
+			App.contracts.RockPaperScissors.deployed()
+				.then(function(instance) {
+					solidityEvent = instance.allEvents();
 
-  				solidityEvent.watch(function(err, result) {
-  					prevEvent = true;
-  				});
-  			});
+					solidityEvent.watch(function(err, result) {
+						prevEvent = true;
+					});
+				});
 
 			App.listenForEvents();
 
@@ -127,12 +127,10 @@ App = {
 	registerPlayer: function() {
 		App.contracts.RockPaperScissors.deployed()
 			.then(function(instance) {
-				console.log("Calling function");
 				return instance.registerPlayer({ from: App.account });
 			})
 			.then(function(result) {
-				// Wait for votes to update
-				console.log("Player Registered");
+        App.render();
 			})
 			.catch(function(err) {
 				console.error(err);
@@ -145,11 +143,10 @@ App = {
 				solidityEvent = instance.allEvents();
 
 				solidityEvent.watch(function(err, result) {
-					console.log("event triggered", result.event);
-          if (prevEvent) {
-            //Skip prev event
-            prevEvent = false;
-          } else if (result.event == "StatusEvent") {
+					if (prevEvent) {
+						//Skip prev event
+						prevEvent = false;
+					} else if (result.event == "StatusEvent") {
 						App.render();
 					} else if (result.event == "ErrorEvent") {
 						alert(result.args.error);

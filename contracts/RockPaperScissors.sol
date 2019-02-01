@@ -73,22 +73,19 @@ contract RockPaperScissors {
             emit ErrorEvent('Error: User Already registered');
             return;
         }
-
-        //TODO: fix this move to else branch
-        require(players[1].addr == address(0) || players[2].addr == address(0));
-
+        
         uint playerId = 0;
 
         if (players[1].addr == address(0)) {
             playerId = 1;
         } else if (players[2].addr == address(0)) {
             playerId = 2;
+        } else {
+          emit ErrorEvent('Error: No more space for new users');
+          return;
         }
         players[playerId].addr = msg.sender;
         players[playerId].status = "Registered";
-
-        // trigger voted event
-        emit StatusEvent();
     }
 
     // Constructor
