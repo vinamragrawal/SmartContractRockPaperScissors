@@ -40,11 +40,19 @@ App = {
 
 			App.listenForEvents();
 
+      lastRender = 0;
+
 			return App.render();
 		});
 	},
 
 	render: function() {
+    console.log(Date.now());
+    if (Date.now() - lastRender < 100){
+       return;
+    }
+    lastRender = Date.now();
+
 		var electionInstance;
 		var loader = $("#loader");
 		var content = $("#content");
@@ -92,24 +100,25 @@ App = {
       App.contracts.RockPaperScissors.deployed()
   			.then(function(instance) {
   				electionInstance = instance;
-  				return electionInstance.choiceCount();
+  				return electionInstance.itemCount();
   			})
-  			.then(function(choiceCount) {
+  			.then(function(itemCount) {
   				var candidatesSelect = $('#candidatesSelect');
   				candidatesSelect.empty();
 
-  				for (var i = 0; i < choiceCount; i++) {
-  					electionInstance.choices(i)
-  						.then(function(choice) {
-  							var num = choice[0];
-  							var name = choice[1];
+  				for (var i = 0; i < itemCount; i++) {
+  					electionInstance.items(i)
+  						.then(function(item) {
+  							var num = item[0];
+  							var name = item[1];
 
   							// Render candidate ballot option
   							var option = "<option value='" + num + "' >" + name + "</ option>";
   							candidatesSelect.append(option);
   						});
   				}
-  				return electionInstance.voters(App.account);
+  				// return electionInstance.voters(App.account);
+          return false;
   			})
   			.then(function(hasVoted) {
   				// Do not allow a user to vote
@@ -123,20 +132,15 @@ App = {
   			});
 	},
 
-	castVote: function() {
-		var candidateId = $('#candidatesSelect')
+	attack: function() {
+		var itemId = $('#candidatesSelect')
 			.val();
 		App.contracts.RockPaperScissors.deployed()
 			.then(function(instance) {
-				console.log(candidateId);
-				return instance.vote(candidateId, { from: App.account });
+				return instance.attack(itemId, { from: App.account });
 			})
 			.then(function(result) {
-				// Wait for votes to update
-				$("#content")
-					.hide();
-				$("#loader")
-					.show();
+				  App.render();
 			})
 			.catch(function(err) {
 				console.error(err);
