@@ -7,8 +7,8 @@ contract RockPaperScissors {
         string status;
         address addr;
         bool hasAttacked;
-        uint revealedId;
-        uint itemId;
+        uint256 revealedId;
+        uint256 itemId;
     }
 
     struct Item {
@@ -28,6 +28,9 @@ contract RockPaperScissors {
     // Store item Count
     uint public itemCount;
 
+    //Random number generated based on member input
+    uint256 public randomNumber = 1;
+
     // Re-render page
     event StatusEvent ();
     // Error message display
@@ -46,7 +49,7 @@ contract RockPaperScissors {
     }
 
     //register players
-    function registerPlayer () public {
+    function registerPlayer (uint randNum) public {
         if (msg.sender == players[1].addr || msg.sender == players[2].addr) {
             emit ErrorEvent('Error: User Already registered');
             return;
@@ -63,12 +66,15 @@ contract RockPaperScissors {
             return;
         }
 
+        //Update random with user input
+        randomNumber = randNum ^ randomNumber;
+
         // show updated status
         emit StatusEvent();
     }
 
     // attack with given item
-    function attack (uint _itemId) public {
+    function attack (uint256 _itemId) public {
         uint playerId = 0;
 
         // Check if player registered
@@ -90,12 +96,6 @@ contract RockPaperScissors {
         // require to check if already not chosen
         if (players[playerId].hasAttacked){
             emit ErrorEvent('Error: Already chosen an item');
-            return;
-        }
-
-        // require a valid item
-        if (_itemId < 0 || _itemId >= itemCount){
-            emit ErrorEvent('Error: Incorrect item chosen');
             return;
         }
 
@@ -148,48 +148,53 @@ contract RockPaperScissors {
     function winner () private {
 
         // check revealed item match
-        if (players[1].itemId != players[1].revealedId ){
+        if (players[1].itemId != uint256(keccak256(abi.encodePacked(players[1].revealedId + randomNumber)))){
             emit ErrorEvent('Player 2 won, Player 1 wrong item revealed');
             return;
         }
 
-        if (players[2].itemId != players[2].revealedId ){
+        if (players[2].itemId != uint256(keccak256(abi.encodePacked(players[2].revealedId + randomNumber)))){
             emit ErrorEvent('Player 1 won, Player 2 wrong item revealed');
             return;
         }
 
+        uint player1Item =  players[1].revealedId % itemCount;
+        uint player2Item =  players[2].revealedId % itemCount;
+
         // calculate winner
         //Rock Case
-        if (players[1].itemId == 0){
-            if (players[2].itemId == 0) {
+        if (player1Item == 0){
+            if (player2Item == 0) {
                 emit ErrorEvent('Draw');
-            } else if (players[2].itemId == 1) {
+            } else if (player2Item == 1) {
                 emit ErrorEvent('Player 1 Won');
             } else {
                 emit ErrorEvent('Player 2 Won');
             }
         }
         //Paper Case
-        else if (players[1].itemId == 1){
-            if (players[2].itemId == 0) {
+        else if (player1Item == 1){
+            if (player2Item == 0) {
                 emit ErrorEvent('Player 1 Won');
-            } else if (players[2].itemId == 1) {
+            } else if (player2Item == 1) {
                 emit ErrorEvent('Draw');
             } else {
                 emit ErrorEvent('Player 2 Won');
             }
         }
         //Scissor case
-        else if (players[1].itemId == 2){
-            if (players[2].itemId == 0) {
+        else if (player1Item == 2){
+            if (player2Item == 0) {
                 emit ErrorEvent('Player 2 Won');
-            } else if (players[2].itemId == 1) {
+            } else if (player2Item == 1) {
                 emit ErrorEvent('Player 1 Won');
             } else {
                 emit ErrorEvent('Draw');
             }
         }
     }
+
+    function getData() public view returns(uint256) { return randomNumber; }
 
     // Constructor
     constructor() public {

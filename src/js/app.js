@@ -2,6 +2,7 @@ App = {
 	web3Provider: null,
 	contracts: {},
 	account: '0x0',
+	itemChoices: 0,
 
 	init: function() {
 		return App.initWeb3();
@@ -40,18 +41,16 @@ App = {
 
 			App.listenForEvents();
 
-      lastRender = 0;
-
+			lastRender = 0;
 			return App.render();
 		});
 	},
 
 	render: function() {
-    console.log(Date.now());
-    if (Date.now() - lastRender < 200){
-       return;
-    }
-    lastRender = Date.now();
+		if (Date.now() - lastRender < 200) {
+			return;
+		}
+		lastRender = Date.now();
 
 		var electionInstance;
 		var loader = $("#loader");
@@ -90,65 +89,84 @@ App = {
 						});
 				}
 
-        loader.hide();
+				loader.hide();
 				content.show();
 			})
 			.catch(function(error) {
 				console.warn(error);
 			});
 
-      App.contracts.RockPaperScissors.deployed()
-  			.then(function(instance) {
-  				electionInstance = instance;
-  				return electionInstance.itemCount();
-  			})
-  			.then(function(itemCount) {
-  				var candidatesSelect = $('#candidatesSelect');
-  				candidatesSelect.empty();
+		App.contracts.RockPaperScissors.deployed()
+			.then(function(instance) {
+				electionInstance = instance;
+				return electionInstance.itemCount();
+			})
+			.then(function(itemCount) {
+				var candidatesSelect = $('#candidatesSelect');
+				candidatesSelect.empty();
 
-  				for (var i = 0; i < itemCount; i++) {
-  					electionInstance.items(i)
-  						.then(function(item) {
-  							var num = item[0];
-  							var name = item[1];
+				App.itemChoices = itemCount;
 
-  							// Render candidate ballot option
-  							var option = "<option value='" + num + "' >" + name + "</ option>";
-  							candidatesSelect.append(option);
-  						});
-  				}
-  				// return electionInstance.voters(App.account);
-          return false;
-  			})
-  			.then(function(hasVoted) {
-  				// Do not allow a user to vote
-  				if (hasVoted) {
-  					$('form')
-  						.hide();
-  				}
-  			})
-  			.catch(function(error) {
-  				console.warn(error);
-  			});
+				for (var i = 0; i < itemCount; i++) {
+					electionInstance.items(i)
+						.then(function(item) {
+							var num = item[0];
+							var name = item[1];
+
+							// Render candidate ballot option
+							var option = "<option value='" + num + "' >" + name + "</ option>";
+							candidatesSelect.append(option);
+						});
+				}
+				// return electionInstance.voters(App.account);
+				return false;
+			})
+			.then(function(hasVoted) {
+				// Do not allow a user to vote
+				if (hasVoted) {
+					$('form')
+						.hide();
+				}
+			})
+			.catch(function(error) {
+				console.warn(error);
+			});
 	},
 
 	attack: function() {
 		var itemId = $('#candidatesSelect')
 			.val();
 
-    if (localStorage.getItem(App.account) === null) {
-        localStorage.setItem(App.account, itemId);
-    } else {
-        alert('Error: Already chosen an item');
-        return;
-    }
-
 		App.contracts.RockPaperScissors.deployed()
 			.then(function(instance) {
-				return instance.attack(itemId, { from: App.account });
+				return instance.randomNumber();
 			})
 			.then(function(result) {
-				  App.render();
+				var contractRandomNumber = Number(result);
+
+				var randNum = Math.floor(Math.random() * Math.pow(10, 6));
+				var choice = randNum * App.itemChoices + itemId;
+        var sum = Number(contractRandomNumber) + Number(choice);
+        var val = left_pad(sum.toString(16),64);
+				var hash = web3.sha3(val, { encoding: 'hex' })
+
+				if (localStorage.getItem(App.account) === null) {
+					localStorage.setItem(App.account, choice);
+				} else {
+					alert('Error: Already chosen an item');
+					return;
+				}
+
+				App.contracts.RockPaperScissors.deployed()
+					.then(function(instance) {
+						return instance.attack(hash, { from: App.account });
+					})
+					.then(function(result) {
+						App.render();
+					})
+					.catch(function(err) {
+						console.error(err);
+					});
 			})
 			.catch(function(err) {
 				console.error(err);
@@ -156,29 +174,29 @@ App = {
 	},
 
 	registerPlayer: function() {
+		var randNum = Math.floor(Math.random() * Math.pow(10, 10));
 		App.contracts.RockPaperScissors.deployed()
 			.then(function(instance) {
-				return instance.registerPlayer({ from: App.account });
+				return instance.registerPlayer(randNum, { from: App.account });
 			})
-			.then(function(result) {
-			})
+			.then(function(result) {})
 			.catch(function(err) {
 				console.error(err);
 			});
 	},
 
-  revealItem: function() {
-    App.contracts.RockPaperScissors.deployed()
-      .then(function(instance) {
-        return instance.revealItem(parseInt(localStorage.getItem(App.account)), { from: App.account });
-      })
-      .then(function(result) {
-        App.render();
-      })
-      .catch(function(err) {
-        console.error(err);
-      });
-  },
+	revealItem: function() {
+		App.contracts.RockPaperScissors.deployed()
+			.then(function(instance) {
+				return instance.revealItem(parseInt(localStorage.getItem(App.account)), { from: App.account });
+			})
+			.then(function(result) {
+				App.render();
+			})
+			.catch(function(err) {
+				console.error(err);
+			});
+	},
 
 	listenForEvents: function() {
 		App.contracts.RockPaperScissors.deployed()
@@ -208,3 +226,8 @@ $(function() {
 			App.init();
 		});
 });
+
+function left_pad (str, max) {
+  str = str.toString();
+  return str.length < max ? left_pad("0" + str, max) : str;
+}
