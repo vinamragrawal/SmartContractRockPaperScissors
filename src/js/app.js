@@ -211,14 +211,15 @@ App = {
 						App.render();
 					} else if (result.event == "ErrorEvent") {
 						alert(result.args.error);
+					} else if (result.event == "WinnerEvent") {
+						alert(result.args.msg);
+            //Clear storage for next round
+            localStorage.clear();
 					}
 				});
 			});
 	}
 };
-
-// TODO: Later
-// localStorage.clear();
 
 $(function() {
 	$(window)
