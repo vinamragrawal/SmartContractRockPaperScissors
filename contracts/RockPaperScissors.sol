@@ -16,7 +16,7 @@ contract RockPaperScissors {
         string name;
     }
 
-    uint private itemInitialValue = 1000;
+    uint private itemInitialValue = 0;
 
     // Read/write Candidates
     mapping(uint => Player) public players;
@@ -152,11 +152,13 @@ contract RockPaperScissors {
         // check revealed item match
         if (players[1].itemId != uint256(keccak256(abi.encodePacked(players[1].revealedId + randomNumber)))){
             emit WinnerEvent('Player 2 won, Player 1 wrong item revealed');
+            resetGame();
             return;
         }
 
         if (players[2].itemId != uint256(keccak256(abi.encodePacked(players[2].revealedId + randomNumber)))){
             emit WinnerEvent('Player 1 won, Player 2 wrong item revealed');
+            resetGame();
             return;
         }
 
@@ -195,7 +197,11 @@ contract RockPaperScissors {
             }
         }
 
-        //Reset contract for next round
+        resetGame();
+    }
+
+    function resetGame () private {
+        // Reset contract for next round
         delete players[1];
         delete players[2];
         playerCount = 0;

@@ -55,9 +55,17 @@ App = {
 		var electionInstance;
 		var loader = $("#loader");
 		var content = $("#content");
+    var registerButton = $("#registerButton");
+    var choices = $("#choices");
+    var revealButton = $("#revealButton");
 
 		loader.show();
 		content.hide();
+
+		//Default show register button
+		registerButton.show();
+		choices.hide();
+		revealButton.hide();
 
 		// Load account data
 		web3.eth.getCoinbase(function(err, account) {
@@ -82,13 +90,43 @@ App = {
 						.then(function(player) {
 							var name = player[0];
 							var status = player[1];
+              var addr = player[2];
+              var hasAttacked = player[3];
+              var revealedId = player[4];
 
-							// Render candidate Result
-							var candidateTemplate = "<tr><td>" + name + "</td><td>" + status + "</td></tr>"
+              if (player[2] == App.account){
+                  //If table has current player bold it
+                  name = "<strong>" + name + "</strong>";
+                  status = "<strong>" + status + "</strong>";
+
+                  //Manage UI components
+                  if (revealedId != 0){
+                      //Nothing to do
+                      registerButton.hide();
+                      choices.hide();
+                      revealButton.hide();
+											console.log("1");
+                  } else if (hasAttacked == true) {
+                      //Waiting to reveal
+                      registerButton.hide();
+                      choices.hide();
+                      revealButton.show();
+											console.log("2");
+                  } else {
+										  //Waiting to Choose
+											registerButton.hide();
+                      choices.show();
+                      revealButton.hide();
+											console.log("3");
+									}
+              }
+
+              // Render candidate Result
+							var candidateTemplate = "<tr><td>" + name + "</td><td>" + status + "</td></tr>";
+
 							candidatesResults.append(candidateTemplate);
 						});
 				}
-
 				loader.hide();
 				content.show();
 			})
@@ -121,13 +159,13 @@ App = {
 				// return electionInstance.voters(App.account);
 				return false;
 			})
-			.then(function(hasVoted) {
-				// Do not allow a user to vote
-				if (hasVoted) {
-					$('form')
-						.hide();
-				}
-			})
+			// .then(function(hasVoted) {
+			// 	// Do not allow a user to vote
+			// 	if (hasVoted) {
+			// 		$('form')
+			// 			.hide();
+			// 	}
+			// })
 			.catch(function(error) {
 				console.warn(error);
 			});

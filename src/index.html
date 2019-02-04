@@ -31,16 +31,16 @@
                 <table class="table">
                   <thead>
                     <tr>
-                      <th scope="col">Name</th>
-                      <th scope="col">Status</th>
+                      <th scope="col"><font size="4">Name</font></th>
+                      <th scope="col"><font size="4">Status</font></th>
                     </tr>
                   </thead>
                   <tbody id="candidatesResults">
                   </tbody>
                 </table>
-                <hr/>
-                <button onclick="App.registerPlayer()">Play</button>
-                <form onSubmit="App.attack(); return false;">
+                <button id="registerButton" onclick="App.registerPlayer()">Play</button>
+                <hr />
+                <form id="choices" onSubmit="App.attack(); return false;">
                   <div class="form-group">
                     <label for="candidatesSelect">Select Candidate</label>
                     <select class="form-control" id="candidatesSelect">
@@ -49,7 +49,7 @@
                   <button type="submit" class="btn btn-primary">Vote</button>
                   <hr />
                 </form>
-                <button onclick="App.revealItem()">Reveal Item</button>
+                <button id="revealButton" onclick="App.revealItem()">Reveal Item</button>
                 <p id="accountAddress" class="text-center"></p>
               </div>
             </div>
