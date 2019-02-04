@@ -1,67 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Rock, Paper & Scissors</title>
 
-    <!-- Bootstrap -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <title>Rock, Paper & Scissors</title>
 
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
+  <!-- Bootstrap -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-  </head>
-  <body>
-    <div class="container" style="width: 650px;">
-          <div class="row">
-            <div class="col-lg-12">
-              <h1 class="text-center">Rock, Paper & Scissors Challenge!!!</h1>
-              <hr/>
-              <br/>
-              <div id="loader">
-                <p class="text-center">Loading...</p>
+</head>
+
+<body>
+  <div class="container" style="width: 650px;">
+    <div class="row">
+      <div class="col-lg-12">
+        <h1 class="text-center">Rock, Paper & Scissors Challenge!!!</h1>
+        <hr/>
+        <br/>
+        <div id="loader">
+          <p class="text-center">Loading...</p>
+        </div>
+        <div id="content" style="display: none;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">
+                  <font size="4">Name</font>
+                </th>
+                <th scope="col">
+                  <font size="4">Status</font>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="candidatesResults">
+            </tbody>
+          </table>
+          <hr/>
+          <button id="registerButton" class="btn btn-primary btn-lg btn-block" onclick="App.registerPlayer()">Play</button>
+          <div id="choices">
+            <h4>Select Item</h4>
+            <div class="card" style="width: 20rem; display: inline-block; cursor: pointer;" onclick="App.attack(0);">
+              <img class="card-img-top" style="width: 20rem;" src="Images/rock.gif" alt="Card image cap">
+              <div class="card-body">
+                <p class="text-center" class="card-text">Rock</p>
               </div>
-              <div id="content" style="display: none;">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th scope="col"><font size="4">Name</font></th>
-                      <th scope="col"><font size="4">Status</font></th>
-                    </tr>
-                  </thead>
-                  <tbody id="candidatesResults">
-                  </tbody>
-                </table>
-                <button id="registerButton" onclick="App.registerPlayer()">Play</button>
-                <hr />
-                <form id="choices" onSubmit="App.attack(); return false;">
-                  <div class="form-group">
-                    <label for="candidatesSelect">Select Candidate</label>
-                    <select class="form-control" id="candidatesSelect">
-                    </select>
-                  </div>
-                  <button type="submit" class="btn btn-primary">Vote</button>
-                  <hr />
-                </form>
-                <button id="revealButton" onclick="App.revealItem()">Reveal Item</button>
-                <p id="accountAddress" class="text-center"></p>
+            </div>
+            <div class="card" style="width: 20rem; display: inline-block; cursor: pointer;" onclick="App.attack(1);">
+              <img class="card-img-top" style="width: 20rem;" src="Images/paper.gif" alt="Card image cap">
+              <div class="card-body">
+                <p class="text-center" class="card-text">Paper</p>
+              </div>
+            </div>
+            <div class="card" style="width: 20rem; display: inline-block; cursor: pointer;" onclick="App.attack(2);">
+              <img class="card-img-top" style="width: 20rem;" src="Images/scissors.gif" alt="Card image cap">
+              <div class="card-body">
+                <p class="text-center" class="card-text">Scissors</p>
               </div>
             </div>
           </div>
+          <button id="revealButton" class="btn btn-primary" onclick="App.revealItem()">Reveal Item</button>
+          <br>
+          <br>
+          <p id="accountAddress" class="text-center"></p>
         </div>
+      </div>
+    </div>
+  </div>
 
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/web3.min.js"></script>
-    <script src="js/truffle-contract.js"></script>
-    <script src="js/app.js"></script>
-  </body>
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <!-- Include all compiled plugins (below), or include individual files as needed -->
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/web3.min.js"></script>
+  <script src="js/truffle-contract.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
 </html>

@@ -105,19 +105,16 @@ App = {
                       registerButton.hide();
                       choices.hide();
                       revealButton.hide();
-											console.log("1");
                   } else if (hasAttacked == true) {
                       //Waiting to reveal
                       registerButton.hide();
                       choices.hide();
                       revealButton.show();
-											console.log("2");
                   } else {
 										  //Waiting to Choose
 											registerButton.hide();
                       choices.show();
                       revealButton.hide();
-											console.log("3");
 									}
               }
 
@@ -133,47 +130,9 @@ App = {
 			.catch(function(error) {
 				console.warn(error);
 			});
-
-		App.contracts.RockPaperScissors.deployed()
-			.then(function(instance) {
-				electionInstance = instance;
-				return electionInstance.itemCount();
-			})
-			.then(function(itemCount) {
-				var candidatesSelect = $('#candidatesSelect');
-				candidatesSelect.empty();
-
-				App.itemChoices = itemCount;
-
-				for (var i = 0; i < itemCount; i++) {
-					electionInstance.items(i)
-						.then(function(item) {
-							var num = item[0];
-							var name = item[1];
-
-							// Render candidate ballot option
-							var option = "<option value='" + num + "' >" + name + "</ option>";
-							candidatesSelect.append(option);
-						});
-				}
-				// return electionInstance.voters(App.account);
-				return false;
-			})
-			// .then(function(hasVoted) {
-			// 	// Do not allow a user to vote
-			// 	if (hasVoted) {
-			// 		$('form')
-			// 			.hide();
-			// 	}
-			// })
-			.catch(function(error) {
-				console.warn(error);
-			});
 	},
 
-	attack: function() {
-		var itemId = $('#candidatesSelect')
-			.val();
+	attack: function(itemId) {
 
 		App.contracts.RockPaperScissors.deployed()
 			.then(function(instance) {
