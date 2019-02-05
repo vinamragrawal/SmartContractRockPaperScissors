@@ -36,7 +36,7 @@ contract RockPaperScissors {
     // Error message display
     event ErrorEvent (string error);
     // Announce Winner
-    event WinnerEvent (string msg);
+    event WinnerEvent (string msg, string choice1, string choice2);
 
     //Add new player
     function addPlayer (string memory _name) private {
@@ -151,13 +151,13 @@ contract RockPaperScissors {
 
         // check revealed item match
         if (players[1].itemId != uint256(keccak256(abi.encodePacked(players[1].revealedId + randomNumber)))){
-            emit WinnerEvent('Player 2 won, Player 1 wrong item revealed');
+            emit WinnerEvent('Player 2 won, Player 1 wrong item revealed', '', '');
             resetGame();
             return;
         }
 
         if (players[2].itemId != uint256(keccak256(abi.encodePacked(players[2].revealedId + randomNumber)))){
-            emit WinnerEvent('Player 1 won, Player 2 wrong item revealed');
+            emit WinnerEvent('Player 1 won, Player 2 wrong item revealed', '', '');
             resetGame();
             return;
         }
@@ -169,31 +169,31 @@ contract RockPaperScissors {
         //Rock Case
         if (player1Item == 0){
             if (player2Item == 0) {
-                emit WinnerEvent('Draw');
+                emit WinnerEvent('Draw', "Rock", "Rock");
             } else if (player2Item == 1) {
-                emit WinnerEvent('Player 1 Won');
+                emit WinnerEvent('Player 1 Won', "Rock", "Paper");
             } else {
-                emit WinnerEvent('Player 2 Won');
+                emit WinnerEvent('Player 2 Won', "Rock", "Scissors");
             }
         }
         //Paper Case
         else if (player1Item == 1){
             if (player2Item == 0) {
-                emit WinnerEvent('Player 1 Won');
+                emit WinnerEvent('Player 1 Won', "Paper", "Rock");
             } else if (player2Item == 1) {
-                emit WinnerEvent('Draw');
+                emit WinnerEvent('Draw', "Paper", "Paper");
             } else {
-                emit WinnerEvent('Player 2 Won');
+                emit WinnerEvent('Player 2 Won', "Paper", "Scissors");
             }
         }
         //Scissor case
         else if (player1Item == 2){
             if (player2Item == 0) {
-                emit WinnerEvent('Player 2 Won');
+                emit WinnerEvent('Player 2 Won', "Scissors", "Rock");
             } else if (player2Item == 1) {
-                emit WinnerEvent('Player 1 Won');
+                emit WinnerEvent('Player 1 Won', "Scissors", "Paper");
             } else {
-                emit WinnerEvent('Draw');
+                emit WinnerEvent('Draw', "Scissors", "Scissors");
             }
         }
 

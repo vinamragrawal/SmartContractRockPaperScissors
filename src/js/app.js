@@ -2,7 +2,7 @@ App = {
 	web3Provider: null,
 	contracts: {},
 	account: '0x0',
-	itemChoices: 0,
+	itemChoices: 3,
 
 	init: function() {
 		return App.initWeb3();
@@ -148,7 +148,7 @@ App = {
 				var hash = web3.sha3(val, { encoding: 'hex' })
 
 				if (localStorage.getItem(App.account) === null) {
-					localStorage.setItem(App.account, choice);
+					  localStorage.setItem(App.account, choice);
 				} else {
 					alert('Error: Already chosen an item');
 					return;
@@ -209,7 +209,13 @@ App = {
 					} else if (result.event == "ErrorEvent") {
 						alert(result.args.error);
 					} else if (result.event == "WinnerEvent") {
-						alert(result.args.msg);
+						if (result.args.choice1.length > 0){
+							  alert(result.args.msg +
+													"\nPlayer 1 chose:" + result.args.choice1 +
+												  "\nPlayer 2 chose:" + result.args.choice2);
+						} else {
+							  alert(result.args.msg);
+						}
             //Clear storage for next round
             localStorage.clear();
 					}
