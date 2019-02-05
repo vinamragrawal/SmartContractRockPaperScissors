@@ -19,23 +19,22 @@ contract RockPaperScissors {
     uint private itemInitialValue = 0;
 
     // Read/write Candidates
-    mapping(uint => Player) public players;
+    mapping(uint => Player) private players;
     // Read/write items
-    mapping(uint => Item) public items;
+    mapping(uint => Item) private items;
 
     // Store Candidates Count
-    uint public playerCount;
+    uint private playerCount;
     // Store item Count
-    uint public itemCount;
+    uint private itemCount;
 
     //Random number generated based on member input
-    uint256 public randomNumber = 1;
+    uint256 private randomNumber = 1;
 
     //Timer for other player
-    uint public timer = 0;
+    uint private timer = 0;
     uint private waitingForPlayer = 0;
-    // uint private waitTime = 2*60;
-    uint private waitTime = 10;
+    uint private waitTime = 2*60;
 
     // Re-render page
     event StatusEvent ();
@@ -223,6 +222,21 @@ contract RockPaperScissors {
                 resetGame();
             }
         }
+    }
+
+    function getPlayerCount () public view returns (uint) {
+        return playerCount;
+    }
+
+    function getContractRandomNumber () public view returns (uint256) {
+        return randomNumber;
+    }
+
+    function getPlayer (uint id) public view
+        returns (string memory name, string memory status, address addr,
+                 bool hasAttacked, uint256 revealedId, uint256 itemId) {
+        Player memory p =  players[id];
+        return (p.name, p.status, p.addr, p.hasAttacked, p.revealedId, p.itemId);
     }
 
     function resetGame () private {

@@ -79,14 +79,14 @@ App = {
 		App.contracts.RockPaperScissors.deployed()
 			.then(function(instance) {
 				electionInstance = instance;
-				return electionInstance.playerCount();
+				return electionInstance.getPlayerCount();
 			})
 			.then(function(playerCount) {
-				var candidatesResults = $("#candidatesResults");
-				candidatesResults.empty();
+				var playerStatus = $("#playerStatus");
+				playerStatus.empty();
 
 				for (var i = 1; i <= playerCount; i++) {
-					electionInstance.players(i)
+					electionInstance.getPlayer(i)
 						.then(function(player) {
 							var name = player[0];
 							var status = player[1];
@@ -121,7 +121,7 @@ App = {
               // Render candidate Result
 							var candidateTemplate = "<tr><td>" + name + "</td><td>" + status + "</td></tr>";
 
-							candidatesResults.append(candidateTemplate);
+							playerStatus.append(candidateTemplate);
 						});
 				}
 				loader.hide();
@@ -136,7 +136,7 @@ App = {
 
 		App.contracts.RockPaperScissors.deployed()
 			.then(function(instance) {
-				return instance.randomNumber();
+				return instance.getContractRandomNumber();
 			})
 			.then(function(result) {
 				var contractRandomNumber = Number(result);
