@@ -208,6 +208,9 @@ App = {
 						App.render();
 					} else if (result.event == "ErrorEvent") {
 						alert(result.args.error);
+					} else if (result.event == "StartTimerEvent") {
+						startTimer(result.args.waitTime)
+						$("#revealButtonTimer").show()
 					} else if (result.event == "WinnerEvent") {
 						if (result.args.choice1.length > 0){
 							  alert(result.args.msg +
@@ -223,6 +226,31 @@ App = {
 			});
 	}
 };
+
+function startTimer(duration, display) {
+    var timer = duration, minutes, seconds;
+    var interval = setInterval(function () {
+        minutes = parseInt(timer / 60, 10)
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        document.getElementById("time").textContent = minutes + ":" + seconds;
+
+				//Times up
+        if (--timer < 0) {
+						App.contracts.RockPaperScissors.deployed()
+							.then(function(instance) {
+								return instance.timeUp();
+							})
+							.catch(function(err) {
+								console.error(err);
+							});
+							clearInterval(interval);
+        }
+    }, 1000);
+}
 
 $(function() {
 	$(window)

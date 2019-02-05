@@ -31,12 +31,20 @@ contract RockPaperScissors {
     //Random number generated based on member input
     uint256 public randomNumber = 1;
 
+    //Timer for other player
+    uint public timer = 0;
+    uint private waitingForPlayer = 0;
+    // uint private waitTime = 2*60;
+    uint private waitTime = 10;
+
     // Re-render page
     event StatusEvent ();
     // Error message display
     event ErrorEvent (string error);
     // Announce Winner
     event WinnerEvent (string msg, string choice1, string choice2);
+    // Start Timer
+    event StartTimerEvent (address addr, uint waitTime);
 
     //Add new player
     function addPlayer (string memory _name) private {
@@ -122,7 +130,7 @@ contract RockPaperScissors {
             playerId = 2;
         } else {
             emit ErrorEvent('Error: Only registered Players can attack');
-          return;
+            return;
         }
 
         //Check if both players chosen
@@ -140,6 +148,11 @@ contract RockPaperScissors {
         if (players[otherPlayer].revealedId != itemInitialValue) {
             winner();
             return;
+        } else {
+            //start timer for other player
+            timer = now;
+            waitingForPlayer = otherPlayer;
+            emit StartTimerEvent(players[otherPlayer].addr, waitTime);
         }
 
         // trigger voted event
@@ -200,16 +213,29 @@ contract RockPaperScissors {
         resetGame();
     }
 
+    function timeUp () public {
+        if (now - timer >= waitTime){
+            if (waitingForPlayer == 1){
+                emit WinnerEvent('Player 2 won, Time up for player 1', '', '');
+                resetGame();
+            } else if (waitingForPlayer == 2){
+                emit WinnerEvent('Player 1 won, Time up for player 2', '', '');
+                resetGame();
+            }
+        }
+    }
+
     function resetGame () private {
         // Reset contract for next round
         delete players[1];
         delete players[2];
         playerCount = 0;
+        randomNumber = 0;
+        timer = 0;
+        waitingForPlayer = 0;
         addPlayer("Player 1");
         addPlayer("Player 2");
     }
-
-    function getData() public view returns(uint256) { return randomNumber; }
 
     // Constructor
     constructor() public {
