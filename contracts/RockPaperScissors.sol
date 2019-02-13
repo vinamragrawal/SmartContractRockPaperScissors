@@ -39,7 +39,7 @@ contract RockPaperScissors {
     // Re-render page
     event StatusEvent ();
     // Error message display
-    event ErrorEvent (string error);
+    event ErrorEvent (string error, address toAddr);
     // Announce Winner
     event WinnerEvent (string msg, string choice1, string choice2);
     // Start Timer
@@ -60,7 +60,7 @@ contract RockPaperScissors {
     //register players
     function registerPlayer (uint randNum) payable public {
         if (msg.sender == players[1].addr || msg.sender == players[2].addr) {
-            emit ErrorEvent('Error: User Already registered');
+            emit ErrorEvent('Error: User Already registered', msg.sender);
             return;
         }
 
@@ -75,12 +75,12 @@ contract RockPaperScissors {
             players[2].status = "Waiting to choose";
             players[1].status = "Waiting to choose";
         } else {
-            emit ErrorEvent('Error: No more space for new users');
+            emit ErrorEvent('Error: No more space for new users', msg.sender);
             return;
         }
 
         //Update random with user input
-        randomNumber = randNum ^ randomNumber;
+        randomNumber = uint8(uint256(keccak256(abi.encodePacked(randNum + randomNumber)))%251);
 
         // show updated status
         emit StatusEvent();
@@ -96,19 +96,19 @@ contract RockPaperScissors {
         } else if (players[2].addr == msg.sender){
             playerId = 2;
         } else {
-            emit ErrorEvent('Error: Only registered Players can attack');
+            emit ErrorEvent('Error: Only registered Players can attack', msg.sender);
             return;
         }
 
         //Check if both players registered
         if (players[1].addr == address(0) || players[2].addr == address(0)){
-            emit ErrorEvent('Error: Wait for other player to register');
+            emit ErrorEvent('Error: Wait for other player to register', msg.sender);
             return;
         }
 
         // require to check if already not chosen
         if (players[playerId].hasAttacked){
-            emit ErrorEvent('Error: Already chosen an item');
+            emit ErrorEvent('Error: Already chosen an item', msg.sender);
             return;
         }
 
@@ -132,13 +132,13 @@ contract RockPaperScissors {
         } else if (players[2].addr == msg.sender){
             playerId = 2;
         } else {
-            emit ErrorEvent('Error: Only registered Players can attack');
+            emit ErrorEvent('Error: Only registered Players can attack', msg.sender);
             return;
         }
 
         //Check if both players chosen
         if (players[1].itemId == itemInitialValue || players[2].itemId == itemInitialValue){
-            emit ErrorEvent('Error: Wait for other player to vote');
+            emit ErrorEvent('Error: Wait for other player to vote', msg.sender);
             return;
         }
 

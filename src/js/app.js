@@ -207,7 +207,8 @@ App = {
 					} else if (result.event == "StatusEvent") {
 						App.render();
 					} else if (result.event == "ErrorEvent") {
-						alert(result.args.error);
+						  if (result.args.toAddr == App.account)
+							    alert(result.args.error);
 					} else if (result.event == "StartTimerEvent") {
 						startTimer(result.args.waitTime)
 						$("#revealButtonTimer").show()
