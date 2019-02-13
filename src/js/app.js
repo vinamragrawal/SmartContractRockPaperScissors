@@ -174,7 +174,7 @@ App = {
 		var randNum = Math.floor(Math.random() * Math.pow(10, 10));
 		App.contracts.RockPaperScissors.deployed()
 			.then(function(instance) {
-				return instance.registerPlayer(randNum, { from: App.account });
+				return instance.registerPlayer(randNum, { from: App.account, value:web3.toWei('1','ether') });
 			})
 			.then(function(result) {})
 			.catch(function(err) {

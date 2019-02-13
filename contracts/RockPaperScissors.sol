@@ -5,7 +5,7 @@ contract RockPaperScissors {
     struct Player {
         string name;
         string status;
-        address addr;
+        address payable addr;
         bool hasAttacked;
         uint256 revealedId;
         uint256 itemId;
@@ -58,11 +58,15 @@ contract RockPaperScissors {
     }
 
     //register players
-    function registerPlayer (uint randNum) public {
+    function registerPlayer (uint randNum) payable public {
         if (msg.sender == players[1].addr || msg.sender == players[2].addr) {
             emit ErrorEvent('Error: User Already registered');
             return;
         }
+
+        //Require that registration fees is sent
+        require( msg.value >= 1 ether, "Not enough fees sent");
+
         if (players[1].addr == address(0)) {
             players[1].addr = msg.sender;
             players[1].status = "Registered";
@@ -145,7 +149,7 @@ contract RockPaperScissors {
         uint otherPlayer = 3 - playerId;
 
         if (players[otherPlayer].revealedId != itemInitialValue) {
-            winner();
+            getWinner();
             return;
         } else {
             //start timer for other player
@@ -159,17 +163,19 @@ contract RockPaperScissors {
     }
 
     // calculate who won
-    function winner () private {
+    function getWinner () private {
 
         // check revealed item match
         if (players[1].itemId != uint256(keccak256(abi.encodePacked(players[1].revealedId + randomNumber)))){
             emit WinnerEvent('Player 2 won, Player 1 wrong item revealed', '', '');
+            sendFundsToPlayer(2);
             resetGame();
             return;
         }
 
         if (players[2].itemId != uint256(keccak256(abi.encodePacked(players[2].revealedId + randomNumber)))){
             emit WinnerEvent('Player 1 won, Player 2 wrong item revealed', '', '');
+            sendFundsToPlayer(1);
             resetGame();
             return;
         }
@@ -182,34 +188,55 @@ contract RockPaperScissors {
         if (player1Item == 0){
             if (player2Item == 0) {
                 emit WinnerEvent('Draw', "Rock", "Rock");
+                sendFundsToPlayer(0);
             } else if (player2Item == 1) {
                 emit WinnerEvent('Player 1 Won', "Rock", "Paper");
+                sendFundsToPlayer(1);
             } else {
                 emit WinnerEvent('Player 2 Won', "Rock", "Scissors");
+                sendFundsToPlayer(2);
             }
         }
         //Paper Case
         else if (player1Item == 1){
             if (player2Item == 0) {
                 emit WinnerEvent('Player 1 Won', "Paper", "Rock");
+                sendFundsToPlayer(1);
             } else if (player2Item == 1) {
                 emit WinnerEvent('Draw', "Paper", "Paper");
+                sendFundsToPlayer(0);
             } else {
                 emit WinnerEvent('Player 2 Won', "Paper", "Scissors");
+                sendFundsToPlayer(2);
             }
         }
         //Scissor case
         else if (player1Item == 2){
             if (player2Item == 0) {
                 emit WinnerEvent('Player 2 Won', "Scissors", "Rock");
+                sendFundsToPlayer(2);
             } else if (player2Item == 1) {
                 emit WinnerEvent('Player 1 Won', "Scissors", "Paper");
+                sendFundsToPlayer(1);
             } else {
                 emit WinnerEvent('Draw', "Scissors", "Scissors");
+                sendFundsToPlayer(0);
             }
         }
 
         resetGame();
+    }
+
+    function sendFundsToPlayer(uint playerId) private {
+        //Used transfer instead of call.value for security reasons
+        if (playerId == 0) {
+            // Split the reward in case its a tie.
+            players[1].addr.transfer(getBalance() / 2);
+            players[2].addr.transfer(getBalance());
+        } else {
+            //Send to funds to given player
+            players[playerId].addr.transfer(getBalance());
+        }
     }
 
     function timeUp () public {
@@ -237,6 +264,10 @@ contract RockPaperScissors {
                  bool hasAttacked, uint256 revealedId, uint256 itemId) {
         Player memory p =  players[id];
         return (p.name, p.status, p.addr, p.hasAttacked, p.revealedId, p.itemId);
+    }
+
+    function getBalance() public view returns (uint256) {
+        return address(this).balance;
     }
 
     function resetGame () private {
